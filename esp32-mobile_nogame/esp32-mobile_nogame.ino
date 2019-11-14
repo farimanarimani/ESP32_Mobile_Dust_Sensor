@@ -23,7 +23,7 @@
    the watchdog reboots the ESP if no device reads the sensor values (PM10 values)
 
    last edits:
-   02.09.18 by Felix Ernst (ernst@teco.edu)
+   11.11.19 by Arash Torabi & Farima Narimani (torabi@teco.edu)
 */
 #include "src/lib/ArduinoJson/ArduinoJson.h"
 #include <BLE2902.h>
@@ -43,8 +43,6 @@
 #include "connectCallback.h"
 #include<U8g2lib.h>
 
-// this will assign the name PushButton to pin numer 21
-const int PushButton = 21;
 
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 15, /* data=*/ 4, /* reset=*/ 16);
 
@@ -301,24 +299,24 @@ static const unsigned char happy_bits[] PROGMEM = {
 void draw_duster(uint8_t bleOn) {
 
   if (bleOn) {
-    u8g2.setFont(u8g2_font_5x7_tf);
+    u8g2.setFont(u8g2_font_9x18B_tf);
     u8g2.setFontRefHeightExtendedText();
     u8g2.setFontPosTop();
-    //u8g2.setFontDirection(1);
-    //u8g2.drawStr(120, 8, "CONNECTED!");
+    u8g2.setFontDirection(0);
+    u8g2.drawStr(20, 25, "CONNECTED");
     //u8g2.drawXBMP(10, 0, duster1_width, duster1_height, duster1_bits);
-    u8g2.drawXBMP(0, 10, happy_width, happy_height, happy_bits);
+    //u8g2.drawXBMP(0, 10, happy_width, happy_height, happy_bits);
 
 
   } else {
 
-    u8g2.setFont(u8g2_font_5x7_tf);
+    u8g2.setFont(u8g2_font_9x18B_tf);
     u8g2.setFontRefHeightExtendedText();
     u8g2.setFontPosTop();
-    //u8g2.setFontDirection(1);
-    // u8g2.drawStr(120, 0, "NOT CONNECTED!");
+    u8g2.setFontDirection(0);
+    u8g2.drawStr(10, 25, "NOT CONNECTED!");
     //u8g2.drawXBMP(10, 0, duster2_width, duster2_height, duster2_bits);
-    u8g2.drawXBMP(0, 10, sad_width, sad_height, sad_bits);
+    //u8g2.drawXBMP(0, 10, sad_width, sad_height, sad_bits);
   }
 
 }
@@ -329,9 +327,7 @@ void draw_duster(uint8_t bleOn) {
 */
 
 void setup() {
-  // This statement will declare pin 21 as digital input
-  pinMode(PushButton, INPUT);
-
+ 
   // Display
   u8g2.begin();
   u8g2.firstPage();
@@ -363,13 +359,6 @@ void setup() {
                               BLECharacteristic::PROPERTY_READ |
                               BLECharacteristic::PROPERTY_WRITE
                             );
-  // initialise bleButtonCharacteristic for sds011 sensor
-  pButtonCharacteristic = pDustService->createCharacteristic(
-                          BUTTINNOTIFY_CHARACTERISTIC_UUID,
-                          // set the properties, only read possible too
-                          BLECharacteristic::PROPERTY_READ |
-                          BLECharacteristic::PROPERTY_NOTIFY
-                        );
 
   // initialise bleCharacteristic for sds011 sensor
   pDataCharacteristic = pDustService->createCharacteristic(
@@ -489,20 +478,9 @@ void loop() {
     do {
       draw_duster(1);
     } while ( u8g2.nextPage() );
-    //Serial.print("Connected");
-
-    // digitalRead function stores the Push button state in variable push_button_state
-    int Push_button_state = digitalRead(PushButton);
+      Serial.print("Connected");
     //delay(10);
-    if ( Push_button_state == HIGH ) {
-      pButtonCharacteristic->setValue("down");
-      Serial.print("Button");
-
-      pNotifyCharacteristic->notify();
-
-    } else {
-      pButtonCharacteristic->setValue("up");
-
+ 
       int sdsError = sdsRead();
       if (!sdsError) {
 
@@ -539,7 +517,6 @@ void loop() {
         pNotifyCharacteristic->notify();
       }
       //delay(10); // 100ms => f = 10/s
-    }
   }
 
 }
