@@ -365,7 +365,7 @@ void setup() {
                             );
   // initialise bleButtonCharacteristic for sds011 sensor
   pButtonCharacteristic = pDustService->createCharacteristic(
-                          BUTTINNOTIFY_CHARACTERISTIC_UUID,
+                          BUTTONNOTIFY_CHARACTERISTIC_UUID,
                           // set the properties, only read possible too
                           BLECharacteristic::PROPERTY_READ |
                           BLECharacteristic::PROPERTY_NOTIFY
